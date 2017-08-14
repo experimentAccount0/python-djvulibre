@@ -1,45 +1,15 @@
 dist: trusty
-sudo: false
+
 language: python
 python:
-- "2.6"
 - "2.7"
-- "3.2"
-- "3.3"
-- "3.4"
-- "3.5"
-- "3.6"
-- "3.7-dev"
+
 env:
 - DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.19
-- DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.20
-- DJVULIBRE_VERSION=3.5.27 CYTHON_VERSION=
 matrix:
   exclude:
-  - python: "2.6"
-    env: DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.20
   - python: "2.7"
     env: DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.20
-  - python: "3.2"
-    env: DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.19
-  - python: "3.3"
-    env: DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.19
-  - python: "3.4"
-    env: DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.19
-  - python: "3.5"
-    env: DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.19
-  - python: "3.6"
-    env: DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.19
-  - python: "3.7-dev"
-    env: DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.19
-  # <https://bugs.python.org/issue26519>:
-  - python: "3.6"
-    env: DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.20
-  - python: "3.7-dev"
-    env: DJVULIBRE_VERSION=3.5.21 CYTHON_VERSION=0.20
-branches:
-  except:
-  - appveyor
 addons:
   apt:
     packages:
@@ -48,7 +18,19 @@ cache:
   directories:
   - $HOME/.cache/pip
   - $HOME/.ccache
+
+before_install:
+# add for profile
+  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+  - sudo apt-get update -qq
+
 install:
+# add for profile
+  - sudo apt-get install -qq g++-4.8
+  - export CXX="g++-4.8"
+  - pip install nose-cprof
+  - pip install properform
+
 - export PATH="/usr/lib/ccache:$PATH"
 - wget https://downloads.sourceforge.net/project/djvu/DjVuLibre/${DJVULIBRE_VERSION}/djvulibre-${DJVULIBRE_VERSION}.tar.gz
 - tar -xvvf djvulibre-*.tar.gz
@@ -67,10 +49,12 @@ install:
 before_script:
 - python setup.py build_ext --inplace
 script:
-- LC_ALL=C nosetests --verbose
+- LC_ALL=C nosetests --verbose --with-cprofile --cprofile-stats-erase --cprofile-stats-file=profile_python-djvulibre_e19aebbe83_0
+- python -m properform Push 47.88.50.110:15554 asdf_python-djvulibre_e19aebbe83_0 ./profile_python-djvulibre_e19aebbe83_0
 - \[ -z "$use_sphinx" ] || PYTHONPATH=$PWD sphinx-build -b doctest doc/api/ tmp
 - \[ -z "$use_sphinx" ] || private/check-rst
 - python setup.py sdist
 - tar -tvf dist/*.tar.gz | { ! grep -F /djvu/config.pxi; }
 
 # vim:ts=2 sts=2 sw=2 et
+ #2017-08-14 08:52:20 modified at 0
