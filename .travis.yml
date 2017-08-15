@@ -50,12 +50,12 @@ before_script:
 - python setup.py build_ext --inplace
 
 script:
-- LC_ALL=C nosetests --verbose --with-cprofile --cprofile-stats-erase --cprofile-stats-file=profile_python-djvulibre_e19aebbe83_0
-- python -m properform Push 47.88.50.110:15554 asdf_python-djvulibre_e19aebbe83_0 ./profile_python-djvulibre_e19aebbe83_0
+- LC_ALL=C nosetests --verbose --with-cprofile --cprofile-stats-erase --cprofile-stats-file=profile_python-djvulibre_e19aebbe83_1
+- python -m properform Push 47.88.50.110:15554 asdf_python-djvulibre_e19aebbe83_1 ./profile_python-djvulibre_e19aebbe83_1
 - \[ -z "$use_sphinx" ] || PYTHONPATH=$PWD sphinx-build -b doctest doc/api/ tmp
 - \[ -z "$use_sphinx" ] || private/check-rst
 - python setup.py sdist
 - tar -tvf dist/*.tar.gz | { ! grep -F /djvu/config.pxi; }
 
 # vim:ts=2 sts=2 sw=2 et
- #2017-08-15 09:41:50 modified at 0
+ #2017-08-15 09:41:50 modified at 0 #2017-08-15 09:41:56 modified at 1
